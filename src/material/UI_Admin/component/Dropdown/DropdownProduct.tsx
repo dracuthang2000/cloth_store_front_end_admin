@@ -28,6 +28,7 @@ const Dropdown = () => {
                 </li>
                 <li>
                     <Discount className="icon" />
+
                     <span>Discount</span>
                 </li>
                 <li>
