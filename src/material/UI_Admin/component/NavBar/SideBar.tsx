@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './SideBar.css'
 import {
     Dashboard
@@ -12,10 +12,27 @@ import {
     , ArrowDropUp
 } from '@mui/icons-material'
 import Dropdown from '../Dropdown/DropdownProduct';
+import { useNavigate } from 'react-router-dom';
 const SideBar = () => {
+    const navigate = useNavigate();
     const [dropdownProduct, setDropdownProduct] = useState(false);
+    const [dropDownOrder, setDropdownOrder] = useState(false);
+    var item = document.getElementsByTagName('li');
     const handleClickDropDownProduct = () => {
         setDropdownProduct(!dropdownProduct);
+    }
+    useEffect(() => {
+        for (var i = 0; i < item.length; i++) {
+            item[i].addEventListener('click', function () {
+                var current = document.getElementsByClassName('active');
+                current[0].className = current[0].className.replace('active', ' ');
+                this.className += 'active';
+            })
+        }
+    }, [dropdownProduct, dropDownOrder])
+
+    const handleDropdownOrder = () => {
+        setDropdownOrder(!dropDownOrder);
     }
     return (
         <div className='sideBar'>
@@ -26,7 +43,7 @@ const SideBar = () => {
             <div className='center'>
                 <ul>
                     <p className='title'>MAIN</p>
-                    <li>
+                    <li className='active'>
                         <Dashboard className='icon' />
                         <span>Dashboard</span>
                     </li>
@@ -41,11 +58,11 @@ const SideBar = () => {
                         {dropdownProduct ? <ArrowDropUp className='icon dropdown-icon' /> : <ArrowDropDown className='icon dropdown-icon' />}
                     </li>
                     {dropdownProduct ? <Dropdown /> : <></>}
-                    <li>
+                    <li onClick={() => navigate("/order")}>
                         <CreditCard className='icon' />
                         <span>Orders</span>
                     </li>
-                    <li>
+                    <li onClick={handleDropdownOrder}>
                         <LocalShipping className='icon' />
                         <span>Delivery</span>
                     </li>

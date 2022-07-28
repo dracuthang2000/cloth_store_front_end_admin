@@ -36,7 +36,7 @@ const Dropdown = () => {
                 </li>
                 <li>
                     <AllInclusive className="icon" />
-                    <span>Stuff</span>
+                    <span>Material</span>
                 </li>
             </ul>
         </div >
