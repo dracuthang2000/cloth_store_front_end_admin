@@ -7,8 +7,10 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TablePagination from '@mui/material/TablePagination';
 import TableRow from '@mui/material/TableRow';
+import { Link } from 'react-router-dom';
 import { Select, FormControl, InputLabel, MenuItem, Button, Tooltip } from '@mui/material';
 import { Close, Done } from '@mui/icons-material';
+import Axios from "../../../Axios";
 import './TableOrder.css';
 
 interface Column {
@@ -28,7 +30,6 @@ const columns: readonly Column[] = [
         label: 'Shipper',
         minWidth: 230,
         align: 'center',
-        format: (value: number) => value.toLocaleString('en-US'),
     },
     {
         id: 'action',
@@ -41,45 +42,30 @@ const columns: readonly Column[] = [
         label: '',
         minWidth: 100,
         align: 'center',
-        format: (value: number) => value.toFixed(2),
     },
 ];
 
 interface Data {
     username: string;
-    bill_number: number;
-    shipper: number;
+    bill_number: string;
+    shipper: string;
     date: string;
 }
 
 function createData(
     username: string,
-    bill_number: number,
-    shipper: number,
+    bill_number: string,
+    shipper: string,
     date: string,
 ): Data {
     return { username, bill_number, shipper, date };
 }
 
 const rows = [
-    createData('dracuthang', 1, 10, "28/07/2020"),
-    createData('user2', 2, 20, "28/07/2020"),
-    createData('user1', 3, 30, "28/07/2020"),
-    createData('user3', 4, 40, "28/07/2020"),
-    createData('user4', 5, 50, "28/07/2020"),
-    createData('user5', 6, 60, "28/07/2020"),
-    createData('user6', 7, 70, "28/07/2020"),
-    createData('user7', 8, 80, "28/07/2020"),
-    createData('user8', 9, 90, "28/07/2020"),
-    createData('user9', 10, 100, "28/07/2020"),
-    createData('user10', 11, 110, "28/07/2020"),
-    createData('user11', 12, 120, "28/07/2020"),
-    createData('user12', 13, 130, "28/07/2020"),
-    createData('user13', 14, 140, "28/07/2020"),
-    createData('user14', 15, 150, "28/07/2020"),
+    createData('', '', '', ''),
 ];
 
-export default function TableOrder() {
+export default function TableOrder(props: any) {
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const [rowsTest, setRowsTest] = React.useState(rows);
@@ -92,14 +78,44 @@ export default function TableOrder() {
         setRowsPerPage(+event.target.value);
         setPage(0);
     };
-    const handleChange = (event: any, column: any) => {
-        console.log(rowsTest);
-        //     setRowsTest(rowsTest.map((data: any) => {
-        //         if (data)
-        //     }));
-        // }
+    const getApiByState = (state: any) => {
+        console.log(state);
+        if (state === 'ALL') {
+            Axios.get(`bill/get-list-bill`)
+                .then(res => {
+                    let billTemp = res.data;
+                    setRowsTest(billTemp.map((data: any) => {
+                        return {
+                            username: data.receiver.first_name,
+                            bill_number: data.id,
+                            shipper: '',
+                            date: data.date
+                        }
+                    }))
+                }).catch(error => {
+                    console.log(error);
+                })
+        } else {
+            Axios.get(`bill/get-list-bill-processing/${state}`)
+                .then(res => {
+                    let billTemp = res.data;
+                    setRowsTest(billTemp.map((data: any) => {
+                        return {
+                            username: data.receiver.first_name,
+                            bill_number: data.id,
+                            shipper: '',
+                            date: data.date
+                        }
+                    }))
+                }).catch(error => {
+                    console.log(error);
+                })
+        }
     }
 
+    React.useEffect(() => {
+        getApiByState(props.state);
+    }, [props.state]);
     return (
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
             <TableContainer sx={{ maxHeight: 485 }}>
@@ -173,7 +189,7 @@ export default function TableOrder() {
                                                             </div> : column.id === 'more' ?
                                                                 <div className='view-detail'>
                                                                     <Tooltip title={'view details...'} arrow>
-                                                                        <a href='#'>View details ...</a>
+                                                                        <Link to={`order-detail/${row.bill_number}`}>View details ...</Link>
                                                                     </Tooltip>
                                                                 </div>
                                                                 : value

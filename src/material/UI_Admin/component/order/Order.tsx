@@ -31,7 +31,7 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function Order() {
-    const [value, setValue] = useState(0);
+    const [value, setValue] = useState(sessionStorage.getItem('valueTabOrder') ? parseInt(sessionStorage.getItem('valueTabOrder')!) : 0);
     const bill = {
         id: '',
         date: '',
@@ -78,20 +78,10 @@ export default function Order() {
     }
     const [bills, setBills] = useState([bill])
     useEffect(() => {
-        Axios.get("customer/bill/bill-by-me", {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem("accessToken")}`
-            }
-        })
-            .then(res => {
-                let billTemp = res.data;
-                setBills(billTemp);
-            }).catch(error => {
-                console.log(error);
-            })
     }, [])
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
+        sessionStorage.setItem('valueTabOrder', newValue.toString());
     };
 
     return (
@@ -108,15 +98,19 @@ export default function Order() {
                 </div>
                 <div className='tab-details'>
                     <TabPanel value={value} index={0}>
+                        <TableOrder state={"ALL"} />
                     </TabPanel>
                     <TabPanel value={value} index={1}>
-                        <TableOrder />
+                        <TableOrder state={"PRO"} />
                     </TabPanel>
                     <TabPanel value={value} index={2}>
+                        <TableOrder state={"DEL"} />
                     </TabPanel>
                     <TabPanel value={value} index={3}>
+                        <TableOrder state={"FIN"} />
                     </TabPanel>
                     <TabPanel value={value} index={4}>
+                        <TableOrder state={"CAN"} />
                     </TabPanel>
                 </div>
             </div>
