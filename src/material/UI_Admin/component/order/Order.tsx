@@ -76,9 +76,6 @@ export default function Order() {
         ],
         id_customer: ''
     }
-    const [bills, setBills] = useState([bill])
-    useEffect(() => {
-    }, [])
     const handleChange = (event: React.SyntheticEvent, newValue: number) => {
         setValue(newValue);
         sessionStorage.setItem('valueTabOrder', newValue.toString());

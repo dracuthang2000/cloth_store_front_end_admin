@@ -10,6 +10,7 @@ import {
     , ExitToAppOutlined
     , ArrowDropDown
     , ArrowDropUp
+    , Summarize
 } from '@mui/icons-material'
 import Dropdown from '../Dropdown/DropdownProduct';
 import { useNavigate } from 'react-router-dom';
@@ -65,6 +66,11 @@ const SideBar = () => {
                     <li onClick={handleDropdownOrder}>
                         <LocalShipping className='icon' />
                         <span>Delivery</span>
+                    </li>
+                    <p className='title'>Report</p>
+                    <li onClick={() => navigate("/report")}>
+                        <Summarize className='icon' />
+                        <span>Report</span>
                     </li>
                     <p className='title'>USER</p>
                     <li>
