@@ -8,6 +8,7 @@ import Order from "../component/order/Order";
 import OrderDetail from "../component/order/OrderDetail";
 import UpdateClothes from "../component/Product/Clothes/AddClothe/UpdateClothes";
 import Product from "../component/Product/Product";
+import ReportReceipt from "../component/report/ReportReceipt";
 import ReportRevenue from "../component/report/ReportRevenue";
 
 const Main = () => {
@@ -22,6 +23,7 @@ const Main = () => {
                 <Route path="order" element={<Order />} />
                 <Route path="order/order-detail/:id_bill" element={<OrderDetail />} />
                 <Route path="report" element={<ReportRevenue />} />
+                <Route path="report/receipt" element={<ReportReceipt />} />
             </Route>
             <Route path="/error" element={<Error />} />
         </Routes>
