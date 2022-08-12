@@ -160,11 +160,11 @@ const AddClothes = () => {
                             <div className="bottom">
                                 <Autocomplete
                                     disablePortal
-                                    id="suff"
+                                    id="material"
                                     options={option}
                                     getOptionLabel={(option) => option.brand}
                                     sx={{ width: '100%' }}
-                                    renderInput={(params) => <TextField {...params} label="Stuff *" />}
+                                    renderInput={(params) => <TextField {...params} label="Material *" />}
                                 />
                             </div>
                         </div>
