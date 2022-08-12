@@ -63,7 +63,7 @@ const SideBar = () => {
                         <CreditCard className='icon' />
                         <span>Orders</span>
                     </li>
-                    <li onClick={handleDropdownOrder}>
+                    <li onClick={() => navigate('/delivery')}>
                         <LocalShipping className='icon' />
                         <span>Delivery</span>
                     </li>
@@ -77,7 +77,10 @@ const SideBar = () => {
                         <AccountCircleOutlined className='icon' />
                         <span>Profiles</span>
                     </li>
-                    <li>
+                    <li onClick={() => {
+                        sessionStorage.removeItem('accessToken');
+                        navigate('/login');
+                    }}>
                         <ExitToAppOutlined className='icon' />
                         <span>Log out</span>
                     </li>

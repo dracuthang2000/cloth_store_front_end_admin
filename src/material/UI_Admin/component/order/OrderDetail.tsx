@@ -92,7 +92,6 @@ const OrderDetail = () => {
         Axios.get(`bill/get-bill-by-id/${id_bill}`)
             .then((res) => {
                 let billDetailTemp = res.data;
-                console.log(billDetailTemp);
                 setBillDetail(billDetailTemp);
             }).catch(error => {
                 console.log(error);

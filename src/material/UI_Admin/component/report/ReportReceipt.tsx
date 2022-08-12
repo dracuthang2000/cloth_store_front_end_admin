@@ -1,12 +1,9 @@
-import { Padding } from '@mui/icons-material';
 import { Button } from '@mui/material';
 import React from 'react';
-import jsPDF from 'jspdf';
-import { PDFExport, savePDF } from "@progress/kendo-react-pdf";
+import { PDFExport } from "@progress/kendo-react-pdf";
 
 import './ReportReceipt.css';
 const ReportReceipt = () => {
-    const container = React.useRef<HTMLDivElement>(null);
     const pdfExportComponent = React.useRef<PDFExport>(null);
     const generatePdf = () => {
         if (pdfExportComponent.current) {
