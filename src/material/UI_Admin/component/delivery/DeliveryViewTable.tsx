@@ -12,7 +12,7 @@ import {
     TextField,
 } from "@mui/material";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 const DeliverView = () => {
     const initial = [{
         id: 1, image: require('../../image/frame.png'), product_name: 'T-shirt blue strong', size: 'S', color: 'red', price: 10000, quantity: 10, address: 'Tan Hai, Cam Hai Tay, Cam Lam, Khanh Hoa', phone_number: '0367511826', full_name: 'Nguyễn Quốc Thắng'
@@ -60,9 +60,9 @@ const DeliverView = () => {
         setPage(0);
     };
     return (
-        <div className="container" >
+        <div style={{ width: '160vh', display: 'flex', justifyContent: 'center' }}>
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-                <TableContainer sx={{ maxHeight: 600 }}>
+                <TableContainer sx={{ maxHeight: 600, width: '100%' }}>
                     <Table aria-label="simple-label">
                         <TableHead>
                             <TableRow>
@@ -75,11 +75,11 @@ const DeliverView = () => {
                             </TableRow>
                             <TableRow>
                                 <TableCell sx={{ width: '5%', textAlign: 'center' }}>Bill number</TableCell>
-                                <TableCell sx={{ width: '30%', textAlign: 'center' }}>Product</TableCell>
-                                <TableCell sx={{ width: '15%', textAlign: 'center' }}>Name customer</TableCell>
-                                <TableCell sx={{ width: '20%', textAlign: 'center' }}>Address</TableCell>
+                                <TableCell sx={{ width: '25%', textAlign: 'center' }}>Name customer</TableCell>
+                                <TableCell sx={{ width: '30%', textAlign: 'center' }}>Address</TableCell>
                                 <TableCell sx={{ width: '10%', textAlign: 'center' }}>Phone number</TableCell>
-                                <TableCell sx={{ width: '10%', textAlign: 'center' }}>Action</TableCell>
+                                <TableCell sx={{ width: '20%', textAlign: 'center' }}>Action</TableCell>
+                                <TableCell sx={{ width: '10%', textAlign: 'center' }}></TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
@@ -90,7 +90,7 @@ const DeliverView = () => {
                                         <TableCell sx={{ verticalAlign: 'middle', textAlign: 'center' }}>
                                             {page * rowsPerPage + index + 1}
                                         </TableCell>
-                                        <TableCell sx={{ verticalAlign: 'middle', display: 'flex', gap: '5px' }}>
+                                        {/* <TableCell sx={{ verticalAlign: 'middle', display: 'flex', gap: '5px' }}>
                                             <div>
                                                 <img style={{ width: '80px', height: '100px' }} src={data.image} alt='' />
                                             </div>
@@ -110,8 +110,8 @@ const DeliverView = () => {
                                                     {`${Intl.NumberFormat().format(data.price)}đ`}
                                                 </span>
                                             </div>
-                                        </TableCell>
-                                        <TableCell sx={{ verticalAlign: 'middle' }}>
+                                        </TableCell> */}
+                                        <TableCell sx={{ verticalAlign: 'middle', textAlign: 'center' }}>
                                             {data.full_name}
                                         </TableCell>
                                         <TableCell sx={{
@@ -124,12 +124,11 @@ const DeliverView = () => {
                                         }}>
                                             {data.phone_number}
                                         </TableCell>
+                                        <TableCell sx={{ verticalAlign: 'middle', display: 'flex', justifyContent: 'center' }}>
+                                            <Button sx={{ width: 'auto' }} variant="outlined" onClick={() => handleClickConfirm(data)}>Delivered</Button>
+                                        </TableCell>
                                         <TableCell sx={{ verticalAlign: 'middle' }}>
-                                            <div style={{ height: '100px', display: 'table' }}>
-                                                <div style={{ display: 'table-cell', verticalAlign: 'middle', paddingRight: '5px' }}>
-                                                    <Button sx={{ width: 'auto' }} variant="outlined" onClick={() => handleClickConfirm(data)}>Delivered</Button>
-                                                </div>
-                                            </div>
+                                            <Link to={'#'}>More....</Link>
                                         </TableCell>
                                     </TableRow>
                                 ))}
