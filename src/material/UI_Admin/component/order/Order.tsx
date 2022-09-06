@@ -86,7 +86,7 @@ export default function Order() {
             <div className='container-delivery-status'>
                 <div className='tablist'>
                     <Tabs className='tabs-delivery' sx={{ width: '100%' }} value={value} onChange={handleChange} centered>
-                        <Tab sx={{ width: '20%' }} label="All" />
+                        {/* <Tab sx={{ width: '20%' }} label="All" /> */}
                         <Tab sx={{ width: '20%' }} label="Processing" />
                         <Tab sx={{ width: '20%' }} label="Delivering" />
                         <Tab sx={{ width: '20%' }} label="Finishing" />
@@ -94,19 +94,19 @@ export default function Order() {
                     </Tabs>
                 </div>
                 <div className='tab-details'>
-                    <TabPanel value={value} index={0}>
+                    {/* <TabPanel value={value} index={0}>
                         <TableOrder state={"ALL"} />
-                    </TabPanel>
-                    <TabPanel value={value} index={1}>
+                    </TabPanel> */}
+                    <TabPanel value={value} index={0}>
                         <TableOrder state={"PRO"} />
                     </TabPanel>
-                    <TabPanel value={value} index={2}>
+                    <TabPanel value={value} index={1}>
                         <TableOrder state={"DEL"} />
                     </TabPanel>
-                    <TabPanel value={value} index={3}>
+                    <TabPanel value={value} index={2}>
                         <TableOrder state={"FIN"} />
                     </TabPanel>
-                    <TabPanel value={value} index={4}>
+                    <TabPanel value={value} index={3}>
                         <TableOrder state={"CAN"} />
                     </TabPanel>
                 </div>

@@ -26,10 +26,10 @@ const Dropdown = () => {
                     <BrandingWatermark className="icon" />
                     <span>Brand</span>
                 </li>
-                <li>
+                {/* <li>
                     <Discount className="icon" />
                     <span>Discount</span>
-                </li>
+                </li> */}
                 <li onClick={() => redirect(`/product/label`)}>
                     <Bookmarks className="icon" />
                     <span>Label</span>

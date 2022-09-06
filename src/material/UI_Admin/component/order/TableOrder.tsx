@@ -122,17 +122,17 @@ export default function TableOrder(props: any) {
             })
     }, [])
     const handleAccept = (item: any) => {
-        let selectShipper = '' as any;
-        for (var i in product) {
-            if (product[i].bill_number === item.bill_number) {
-                selectShipper = product[i].shipper;
-                break;
-            }
-        }
-        if (selectShipper !== '' && selectShipper !== null) {
+        // let selectShipper = '' as any;
+        // for (var i in product) {
+        //     if (product[i].bill_number === item.bill_number) {
+        //         selectShipper = product[i].shipper;
+        //         break;
+        //     }
+        // }
+        if (item.shipper !== '' && item.shipper !== null) {
             Axios.put(`order/update-status-order`, {
                 "id": item.bill_number,
-                "id_shipper": selectShipper,
+                "id_shipper": item.shipper,
                 "state": "DEL"
             }, {
                 headers: {

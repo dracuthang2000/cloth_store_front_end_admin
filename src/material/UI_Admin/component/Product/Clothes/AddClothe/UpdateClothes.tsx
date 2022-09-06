@@ -191,6 +191,7 @@ const AddClothes = () => {
     }
     const [error, setError] = useState(initialError);
     const [messageError, setMessageError] = useState(initialMessageError);
+    const [description, setDescription] = useState('' as any)
     const navigate = useNavigate();
     const { id_product } = useParams();
     const [img, setImg] = useState<any | null>('');
@@ -266,7 +267,7 @@ const AddClothes = () => {
             id: product?.id,
             brand: product?.brand,
             color: color,
-            description: 'string',
+            description: description,
             gender: product?.gender,
             img: product?.img,
             is_active: true,
@@ -380,7 +381,7 @@ const AddClothes = () => {
         Axios.post("product/insert-product", {
             brand: product?.brand,
             color: color,
-            description: 'string',
+            description: description,
             gender: product?.gender,
             img: product?.img,
             is_active: true,
@@ -532,13 +533,13 @@ const AddClothes = () => {
                             <div className="bottom">
                                 <CKEditor key={1}
                                     editor={ClassicEditor}
-                                    data=""
+                                    data={`${product?.description}`}
                                     onReady={(editor: any) => {
                                         console.log('Editor is ready to use!', editor);
                                     }}
                                     onChange={(event: any, editor: any) => {
-                                        const data = editor.getData();
-                                        console.log({ event, editor, data });
+                                        let data = editor.getData() as any;
+                                        setDescription(data);
                                     }}
                                     onBlur={(event: any, editor: any) => {
                                         console.log('Blur.', editor);
@@ -730,8 +731,8 @@ const AddClothes = () => {
                             <div className="image">
                                 {img ?
                                     <img src={img} alt="" /> : id_product ?
-                                        <img style={{ borderColor: `${error.image ? 'red' : 'rgb(238, 234, 234)'}` }} src={`http://localhost:8081/api/product/image/load/${product?.img}`} alt='' />
-                                        : <img style={{ borderColor: `${error.image ? 'red' : 'rgb(238, 234, 234)'}` }} src={require('../../../../image/frame.png')} alt='' />}
+                                        <img style={{ borderColor: `${error.image && 'red'}` }} src={`http://localhost:8081/api/product/image/load/${product?.img}`} alt='' />
+                                        : <img style={{ borderColor: `${error.image && 'red'}` }} src={require('../../../../image/frame.png')} alt='' />}
                             </div>
                             {error.image && <FormControl error variant="standard">
                                 <FormHelperText id="component-error-text">{messageError.image}</FormHelperText>
