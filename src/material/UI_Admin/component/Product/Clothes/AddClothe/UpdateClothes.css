@@ -41,9 +41,11 @@
     font-weight: 600;
     color: rgb(127, 118, 118);
 }
-.container-input .bottom{
-    flex:1
-}
+/* .container-input .bottom{
+    flex:1;
+    display: flex;
+    flex-direction: column;
+} */
 .header h4{
     color: rgb(127, 118, 118);
 }
@@ -78,4 +80,12 @@
 .imageContainer{
     display: flex;
     justify-content: center;
+    padding-left: 50px;
+    flex-direction: column;
+}
+.color-size{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 5px;
 }

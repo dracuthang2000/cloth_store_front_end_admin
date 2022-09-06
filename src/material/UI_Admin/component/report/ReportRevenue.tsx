@@ -8,10 +8,11 @@ import { Search } from "@mui/icons-material";
 import moment from "moment";
 import Axios from "../../../Axios";
 const ReportRevenue = () => {
+    const initial = { year_month: '8/2022', total_revenue: 85000000 };
     const [valueFromDate, setValueFromDate] = useState('');
     const [valueToDate, setValueToDate] = useState('');
     const [showReport, setShowReport] = useState(false);
-    const [reportRevenueValue, setReportRevenueValue] = useState([]);
+    const [reportRevenueValue, setReportRevenueValue] = useState([initial]);
     const handleChangeFromDate = (value: any) => {
         setValueFromDate(value);
     };
@@ -34,12 +35,16 @@ const ReportRevenue = () => {
         }
     }
     const getReportFromApi = () => {
-        Axios.post(``, {
-            from_date: moment(valueFromDate).format('YYYY-MM-DD'),
-            to_date: moment(valueToDate).format('YYYY-MM-DD')
+        Axios.get(`bill/report/get-report-proceeds`, {
+            params: {
+                fromDate: moment(valueFromDate).format('YYYY-MM-DD'),
+                toDate: moment(valueToDate).format('YYYY-MM-DD')
+            }
         })
             .then(res => {
                 setReportRevenueValue(res.data)
+                console.log(res.data);
+
             })
             .catch((error) => console.log(error))
     }
@@ -81,7 +86,7 @@ const ReportRevenue = () => {
                             {reportRevenueValue.map((data: any) =>
                                 <tr>
                                     <td>{data.year_month}</td>
-                                    <td>{data.total_revenue}</td>
+                                    <td>{data.total}</td>
                                 </tr>)}
                         </tbody>
                     </Table>

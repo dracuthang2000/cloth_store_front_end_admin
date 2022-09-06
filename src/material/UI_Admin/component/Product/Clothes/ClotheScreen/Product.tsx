@@ -1,4 +1,4 @@
-import { Search } from "@mui/icons-material";
+import { Restore, Search } from "@mui/icons-material";
 import {
     Table,
     TableBody,
@@ -13,49 +13,22 @@ import {
     MenuItem,
     Select,
     InputLabel,
-    FormControl
+    FormControl,
+    selectClasses
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Axios from "../../../../../Axios";
 import './Product.css';
 
 const Product = () => {
-    const initial = [{
-        id: 1, image: require('../../../../image/frame.png'), name: 'T-shirt blue strong', description: 'Size:XXL, Color: Blue, Material: cord-ton, gender: male', price: 10000, quantity_stock: 10, status: true, is_new: true
-    }, {
-        id: 2, image: require('../../../../image/frame.png'), name: 'T-shirt blue strong T-shirt blue strong T-shirt blue strong T-shirt blue strong', description: 'Size:XXL, Color: Blue, Material: cord-ton, gender: male', price: 10000, quantity_stock: 10, status: false, is_new: false
-    }, {
-        id: 3, image: require('../../../../image/frame.png'), name: 'T-shirt blue strong', description: 'Size:XXL, Color: Blue, Material: cord-ton, gender: male', price: 10000, quantity_stock: 10, status: true, is_new: false
-    }, {
-        id: 4, image: require('../../../../image/frame.png'), name: 'T-shirt blue strong', description: 'Size:XXL, Color: Blue, Material: cord-ton, gender: male', price: 10000, quantity_stock: 10, status: true, is_new: true
-    },
-    {
-        id: 5, image: require('../../../../image/frame.png'), name: 'T-shirt blue strong', description: 'Size:XXL, Color: Blue, Material: cord-ton, gender: male', price: 10000, quantity_stock: 10, status: true, is_new: true
-    },
-    {
-        id: 6, image: require('../../../../image/frame.png'), name: 'T-shirt blue strong', description: 'Size:XXL, Color: Blue, Material: cord-ton, gender: male', price: 10000, quantity_stock: 10, status: true, is_new: true
-    },
-    {
-        id: 7, image: require('../../../../image/frame.png'), name: 'T-shirt blue strong', description: 'Size:XXL, Color: Blue, Material: cord-ton, gender: male', price: 10000, quantity_stock: 10, status: true, is_new: true
-    },
-    {
-        id: 8, image: require('../../../../image/frame.png'), name: 'T-shirt blue strong', description: 'Size:XXL, Color: Blue, Material: cord-ton, gender: male', price: 10000, quantity_stock: 10, status: true, is_new: true
-    },
-    {
-        id: 9, image: require('../../../../image/frame.png'), name: 'T-shirt blue strong', description: 'Size:XXL, Color: Blue, Material: cord-ton, gender: male', price: 10000, quantity_stock: 10, status: true, is_new: true
-    },
-    {
-        id: 10, image: require('../../../../image/frame.png'), name: 'T-shirt blue strong', description: 'Size:XXL, Color: Blue, Material: cord-ton, gender: male', price: 10000, quantity_stock: 10, status: true, is_new: true
-    },
-    {
-        id: 11, image: require('../../../../image/frame.png'), name: 'T-shirt blue strong', description: 'Size:XXL, Color: Blue, Material: cord-ton, gender: male', price: 10000, quantity_stock: 10, status: true, is_new: true
-    }
-    ];
-    const [product, setProduct] = useState(initial);
-    const [selectNew, setSelectNew] = useState('');
+    const [product, setProduct] = useState([] as any);
+    const [selectNew, setSelectNew] = useState('' as any);
+    const [keyword, setKeyword] = useState("");
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
     const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [rowsPerPage, setRowsPerPage] = useState(5);
 
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
@@ -75,6 +48,73 @@ const Product = () => {
     const handleClickNewProduct = () => {
         navigate(`update-clothes`)
     }
+    useEffect(() => {
+        if (loading) {
+            Axios.get('product/get-list-product')
+                .then((res) => {
+                    const listProduct = res.data;
+                    setProduct(
+                        listProduct.map((p: any) => {
+                            return {
+                                id: p.id,
+                                image: p.img,
+                                name: p.product_name,
+                                price: p.price,
+                                is_new: p.is_new,
+                                discount_percent: p.discount,
+                                tag: p.tag,
+                                tag_label: p.label.tag_label,
+                                material: p.material.material_name,
+                                brand: p.brand.brand,
+                                label: p.label.label,
+                                gender: p.gender.gender,
+                                status: p.is_active
+                            };
+                        })
+                    );
+                    setLoading(false);
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        }
+    }, [loading]);
+    const handleReset = () => {
+        setSelectNew("");
+        setLoading(true);
+        setKeyword('');
+    }
+    const handleSearch = () => {
+        Axios.post('product/find-product-by-new-and-name', {
+            key_word: keyword,
+            is_new: selectNew
+        })
+            .then((res) => {
+                const listProduct = res.data;
+                setProduct(
+                    listProduct.map((p: any) => {
+                        return {
+                            id: p.id,
+                            image: p.img,
+                            name: p.product_name,
+                            price: p.price,
+                            is_new: p.is_new,
+                            discount_percent: p.discount,
+                            tag: p.tag,
+                            tag_label: p.label.tag_label,
+                            material: p.material.material_name,
+                            brand: p.brand.brand,
+                            label: p.label.label,
+                            gender: p.gender.gender,
+                            status: p.is_active
+                        };
+                    })
+                );
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
     return (
         <div className="container" >
             <Paper sx={{ width: '100%', overflow: 'hidden' }}>
@@ -82,21 +122,27 @@ const Product = () => {
                     <Table aria-label="simple-label">
                         <TableHead>
                             <TableRow>
-                                <TableCell colSpan={6}>
+                                <TableCell colSpan={5}>
                                     <div className="screen-search-product">
-                                        <TextField label='search' sx={{ width: '300px' }} />
+                                        <TextField
+                                            value={keyword}
+                                            onChange={((e) => setKeyword(e.target.value))}
+                                            label='search'
+                                            sx={{ width: '300px' }} />
                                         <FormControl sx={{ width: '200px' }}>
                                             <InputLabel id='select-new'>Select new</InputLabel>
                                             <Select
                                                 labelId="select-new"
-                                                defaultValue={selectNew}
+                                                value={selectNew}
                                                 onChange={handleChangeSelect}
                                                 label={'Select new'}>
+                                                <MenuItem value={""}>None</MenuItem>
                                                 <MenuItem value={0}>Old</MenuItem>
                                                 <MenuItem value={1}>New</MenuItem>
                                             </Select>
                                         </FormControl>
-                                        <Button variant="outlined"><Search /></Button>
+                                        <Button variant="outlined" onClick={handleSearch}><Search /></Button>
+                                        <Button variant="outlined" onClick={handleReset}><Restore /></Button>
                                     </div>
                                 </TableCell>
                                 <TableCell>
@@ -107,7 +153,6 @@ const Product = () => {
                                 <TableCell sx={{ width: '5%', textAlign: 'center' }}>Number</TableCell>
                                 <TableCell sx={{ width: '30%', textAlign: 'center' }}>Product</TableCell>
                                 <TableCell sx={{ width: '25%', textAlign: 'center' }}>Description</TableCell>
-                                <TableCell sx={{ width: '10%', textAlign: 'center' }}>Quantity stock</TableCell>
                                 <TableCell sx={{ width: '10%', textAlign: 'center' }}>Price</TableCell>
                                 <TableCell sx={{ width: '10%', textAlign: 'center' }}>New</TableCell>
                                 <TableCell sx={{ width: '10%', textAlign: 'center' }}>Action</TableCell>
@@ -116,14 +161,14 @@ const Product = () => {
                         <TableBody>
                             {product
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map((data, index: number) => (
+                                .map((data: any, index: number) => (
                                     <TableRow key={data.id}>
                                         <TableCell sx={{ verticalAlign: 'middle', textAlign: 'center' }}>
                                             {page * rowsPerPage + index + 1}
                                         </TableCell>
                                         <TableCell sx={{ verticalAlign: 'middle', display: 'flex', gap: '5px' }}>
                                             <div>
-                                                <img style={{ width: '80px', height: '100px' }} src={data.image} alt='' />
+                                                <img style={{ width: '80px', height: '100px' }} src={`http://localhost:8081/api/product/image/load/${data.image}`} alt='' />
                                             </div>
                                             <div style={{ width: '100%', display: 'table' }}>
                                                 <span style={{ height: 'auto', display: 'table-cell', verticalAlign: 'middle' }}>
@@ -132,12 +177,7 @@ const Product = () => {
                                             </div>
                                         </TableCell>
                                         <TableCell sx={{ verticalAlign: 'middle' }}>
-                                            {data.description}
-                                        </TableCell>
-                                        <TableCell sx={{
-                                            verticalAlign: 'middle', textAlign: 'center',
-                                        }}>
-                                            {data.quantity_stock}
+                                            {`${data.label} được sản xuất bởi hãng ${data.brand}, cùng với chất liệu: ${data.material}, áo này thì thích hợp cho ${data.gender === "MALE" ? "Nam" : "Nữ"}  `}
                                         </TableCell>
                                         <TableCell sx={{
                                             verticalAlign: 'middle', textAlign: 'center', '::after': {
@@ -149,15 +189,18 @@ const Product = () => {
                                         <TableCell sx={{ verticalAlign: 'middle', textAlign: 'center' }}>
                                             {data.is_new === true ? 'Yes' : 'No'}
                                         </TableCell>
-                                        <TableCell sx={{ verticalAlign: 'middle' }}>
-                                            <div style={{ height: '100px', display: 'table' }}>
-                                                <div style={{ display: 'table-cell', verticalAlign: 'middle', paddingRight: '5px' }}>
-                                                    <Button sx={{ width: '80px' }} variant="outlined" onClick={() => handleClickUpdate(data)}>UPDATE</Button>
+                                        <TableCell sx={{ verticalAlign: 'middle', textAlign: 'center' }}>
+                                            <div style={{ verticalAlign: 'middle' }}>
+                                                <Button variant="outlined" onClick={() => handleClickUpdate(data)}>UPDATE</Button>
+                                            </div>
+                                            {/* <div style={{ display: 'table' }}>
+                                                <div style={{ verticalAlign: 'middle', textAlign: 'center', }}>
+                                                    <Button variant="outlined" onClick={() => handleClickUpdate(data)}>UPDATE</Button>
                                                 </div>
                                                 <div style={{ display: 'table-cell', verticalAlign: 'middle' }}>
-                                                    {data.status ? <Button sx={{ width: '80px' }} variant="outlined">DISABLE</Button> : <Button sx={{ width: '80px' }} variant="outlined">Enable</Button>}
+                                                    {data.status ? <Button variant="outlined">DELETE</Button> : <Button sx={{ width: '80px' }} variant="outlined">Enable</Button>}
                                                 </div>
-                                            </div>
+                                            </div> */}
                                         </TableCell>
                                     </TableRow>
                                 ))}

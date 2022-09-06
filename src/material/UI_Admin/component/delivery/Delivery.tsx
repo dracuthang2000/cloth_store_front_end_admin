@@ -44,13 +44,13 @@ const Delivery = () => {
                     </div>
                     <div className='tab-details'>
                         <TabPanel value={value} index={0}>
-                            <DeliverView />
+                            <DeliverView state={`ALL`} />
                         </TabPanel>
                         <TabPanel value={value} index={1}>
-                            <DeliverView />
+                            <DeliverView state={`DEL`} />
                         </TabPanel>
                         <TabPanel value={value} index={2}>
-                            <DeliverView />
+                            <DeliverView state={`FIN`} />
                         </TabPanel>
                     </div>
                 </div>

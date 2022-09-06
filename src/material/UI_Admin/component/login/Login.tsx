@@ -4,18 +4,54 @@ import { Button, FormControl, FormHelperText } from "@mui/material";
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import './Login.css';
 import { useNavigate } from "react-router-dom";
+import Axios from "../../../Axios";
+
+interface initialUser {
+    username: string,
+    password: string,
+}
 
 const Login = (props: any) => {
     const [showMessageError, setShowMessageError] = useState(false);
     const [hiddenPassword, setHiddenPassword] = useState(true);
+    const [user, setUser] = useState<initialUser | any>()
     const navigate = useNavigate();
     const handleClickLogin = () => {
-        setShowMessageError(!showMessageError);
-        sessionStorage.setItem('accessToken', 'true');
-        navigate('/');
+        Axios.post(`admin/login`, {
+            username: user?.username,
+            password: user?.password,
+        }).then((res) => {
+            sessionStorage.setItem('accessToken', res.data.accessToken);
+            props.setAccessToken(res.data.accessToken);
+            props.setLoading(true);
+            loadPage();
+        }).catch((error) => {
+            setShowMessageError(true);
+        })
     }
     const handleClickHidden = () => {
         setHiddenPassword(!hiddenPassword);
+    }
+    const handleChange = (e: any) => {
+        setUser({ ...user, [e.target.name]: e.target.value });
+    }
+    const loadPage = () => {
+        if (sessionStorage.getItem('accessToken')) {
+            Axios.get(`admin/information/me`, {
+                headers: {
+                    'Authorization': 'Bearer ' + sessionStorage.getItem("accessToken")
+                }
+            })
+                .then((res) => {
+                    if (res.data.role.id == 2) {
+                        navigate('/');
+                    } else {
+                        navigate('/delivery');
+                    }
+                }).catch((e) => {
+                    console.log(e);
+                })
+        }
     }
     return (
         <div className="container-login">
@@ -28,12 +64,16 @@ const Login = (props: any) => {
                             <FormControl fullWidth>
                                 <TextField
                                     error={showMessageError}
+                                    name={'username'}
+                                    onChange={handleChange}
                                     label="username" />
                             </FormControl>
                             <FormControl className="password-container">
                                 <TextField
                                     error={showMessageError}
                                     type={hiddenPassword ? 'password' : 'text'}
+                                    onChange={handleChange}
+                                    name={'password'}
                                     label="password"
                                 />
                                 {hiddenPassword ? <Visibility className="icon-password" onClick={handleClickHidden} />

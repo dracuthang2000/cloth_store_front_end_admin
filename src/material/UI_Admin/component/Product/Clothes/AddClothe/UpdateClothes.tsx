@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import './UpdateClothes.css'
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
@@ -7,48 +7,276 @@ import {
     , Avatar
     , Autocomplete
     , Box
-    , Button
+    , Button,
+    Switch,
+    FormControlLabel,
+    FormGroup,
+    Select,
+    MenuItem,
+    InputLabel,
+    FormControl,
+    FormHelperText,
 } from "@mui/material";
 import Axios from "../../../../../Axios";
 import { useNavigate, useParams } from "react-router-dom";
+import ItemColor from "../../color_and_size/ItemColor";
+import { Add } from "@mui/icons-material";
+import ColorAndSize from "../../color_and_size/ColorAndSize";
+
+// interface initialColor {
+//     color: string,
+//     img: string,
+//     isCheck: false;
+// }
+interface initialSizeAndQuantity {
+    size: initialSize,
+    quantity: number
+}
+interface initialSize {
+    size: string,
+    id: string,
+    version: number
+}
+interface initialColor {
+    id: string,
+    color: string,
+    version: number,
+}
+interface initialColorSize {
+    color: initialColor,
+    color_size: [initialSizeAndQuantity],
+    image_byte: any,
+    image_name: string
+}
+interface initialProduct {
+    brand: {
+        brand: string,
+        id: string,
+        image: string,
+        tag_brand: string,
+        version: 0
+    },
+    color: [
+        {
+            color: {
+                color: string,
+                id: string,
+                version: 0
+            },
+            color_size: [
+                {
+                    id: string,
+                    quantity: 0,
+                    size: {
+                        id: string,
+                        size: string,
+                        version: 0
+                    }
+                }
+            ],
+            id: string,
+            img: string,
+            version: 0
+        }
+    ],
+    description: string,
+    gender: {
+        gender: string,
+        id: string,
+        version: 0
+    },
+    id: string,
+    img: string,
+    is_active: true,
+    is_new: boolean,
+    label: {
+        id: string,
+        label: string,
+        tag_label: string,
+        version: 0
+    },
+    lstImage: [
+        {
+            image_byte: string,
+            image_name: string
+        }
+    ],
+    material: {
+        id: string,
+        material_name: string,
+        tag_material: string,
+        "version": 0
+    },
+    price: 0,
+    price_log: [
+        {
+            id: string,
+            price: 0,
+            start_date: string,
+            version: 0
+        }
+    ],
+    "discount": {
+        "id": string,
+        "percent": number,
+        "version": 0
+    },
+    product_name: string,
+    tag: string,
+    version: 0
+}
+interface initialBrand {
+    id: string,
+    brand: string,
+    image: string,
+    version: number,
+    tag_brand: string
+}
+interface initialLabel {
+    id: string,
+    label: string,
+    version: number,
+    tag_label: string
+}
+interface initialDiscount {
+    "id": string,
+    "percent": number,
+    "version": 0
+}
+interface initialMaterial {
+    id: string,
+    material_name: string,
+    version: number,
+    tag_material: string
+}
+
+interface initialImage {
+    image_byte: string,
+    image_name: string
+}
 
 const AddClothes = () => {
-    const option = [
-        { brand: 'Adidas', value: 1, img: 'data:image/png;base64,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' },
-        { brand: 'Albania', phone: '355', value: 2, img: 'data:image/png;base64,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' },
-        { brand: 'Armenia', phone: '374', value: 3, img: 'data:image/png;base64,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' },
-        { brand: 'Angola', phone: '244', value: 4, img: 'data:image/png;base64,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' },
-        { brand: 'Antarctica', phone: '672', value: 5, img: 'data:image/png;base64,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' },
-        { brand: 'Argentina', phone: '54', value: 6, img: 'data:image/png;base64,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' },
-        { brand: 'American Samoa', phone: '1-684', value: 7, img: 'data:image/png;base64,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' }]
-    const [testSelect, setTestSelect] = useState({ brand: 'Adidas', value: 1, img: 'data:image/png;base64,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' });
-    const [searchBrand, setSearchBrand] = useState('');
+    const gender = [
+        {
+            gender: "FEMALE",
+            id: '2',
+            version: 0
+        },
+        {
+            gender: "MALE",
+            id: '1',
+            version: 0
+        }
+
+    ]
+    const initialMessageError = {
+        brand: '',
+        label: '',
+        name: '',
+        material: '',
+        price: '',
+        color_size: '',
+        image: '',
+        gender: ''
+    }
+    const initialError = {
+        brand: false,
+        label: false,
+        name: false,
+        material: false,
+        price: false,
+        color_size: false,
+        image: false,
+        gender: false
+    }
+    const [error, setError] = useState(initialError);
+    const [messageError, setMessageError] = useState(initialMessageError);
     const navigate = useNavigate();
     const { id_product } = useParams();
     const [img, setImg] = useState<any | null>('');
-    const [formData, setFormData] = useState<FormData>(new FormData());
-    const handleChangeSearchBrand = (e: any) => {
-        console.log(e.target.value);
-        setSearchBrand(e.target.value);
-    }
+    const [loadingColor, setLoadingColor] = useState(false);
+    const [color, setColor] = useState([] as any);
+    const [open, setOpen] = useState(false);
+    const [isChooseColor, setIsChooseColor] = useState<Partial<initialColorSize> | null>();
+    const [addColorAndSize, setAddColorAndSize] = useState('' as any);
+    const [product, setProduct] = useState<Partial<initialProduct>>();
+    const [discounts, setDiscounts] = useState<initialDiscount[]>([])
+    const [brands, setBrands] = useState<initialBrand[]>([]);
+    const [labels, setLabels] = useState<initialLabel[]>([]);
+    const [materials, setMaterials] = useState<initialMaterial[]>([]);
+    const [lstImage, setLstImage] = useState<initialImage[]>([]);
     const handleImage = (e: any) => {
         const reader = new FileReader();
         reader.onload = () => {
             if (reader.readyState === 2) {
-                formData.delete('file');
                 setImg(URL.createObjectURL(e.target.files[0]));
-                formData.append('file', e.target.files[0]);
+                console.log(e.target.files[0]);
+                setProduct({ ...product, img: Date.now() + e.target.files[0].name });
+                // setTest({ image_byte: reader.result, image_name: e.target.files[0].name });
             }
         }
         reader.readAsDataURL(e.target.files[0])
     }
-
-    const handleSave = () => {
-        console.log(formData.get('file'));
-        Axios.post("product/image/upload", formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
+    useEffect(() => {
+        if (id_product) {
+            Axios.get(`product/get-product-by-id?id=${id_product}`)
+                .then((res) => {
+                    const listProduct = res.data;
+                    setProduct(listProduct);
+                    setColor(listProduct.color)
+                })
+                .catch((error) => {
+                    console.log(error);
+                });
+        }
+    }, [])
+    useEffect(() => {
+        if (loadingColor) {
+            if (isChooseColor) {
+                console.log('choose', isChooseColor);
+                for (var i in color) {
+                    if (color[i].color.id == isChooseColor.color?.id) {
+                        color[i] = isChooseColor;
+                    }
+                }
+                if (isChooseColor.image_byte !== null) {
+                    let image: initialImage = {
+                        image_name: isChooseColor.image_name as any,
+                        image_byte: isChooseColor.image_byte as any
+                    };
+                    setLstImage([image, ...lstImage])
+                }
+            } else {
+                console.log('add', addColorAndSize);
+                setColor([addColorAndSize, ...color])
+                if (addColorAndSize.image_byte !== null) {
+                    let image: initialImage = {
+                        image_name: addColorAndSize.image_name,
+                        image_byte: addColorAndSize.image_byte
+                    };
+                    setLstImage([image, ...lstImage])
+                }
             }
+            setAddColorAndSize('');
+            setLoadingColor(false);
+        }
+    }, [loadingColor])
+    const putSaveProduct = () => {
+        Axios.put("product/update-product", {
+            id: product?.id,
+            brand: product?.brand,
+            color: color,
+            description: 'string',
+            gender: product?.gender,
+            img: product?.img,
+            is_active: true,
+            is_new: product?.is_new,
+            label: product?.label,
+            lstImage: lstImage,
+            material: product?.material,
+            price: product?.price,
+            product_name: product?.product_name,
+            version: product?.version
         })
             .then((res) => {
                 alert(res.data);
@@ -58,14 +286,220 @@ const AddClothes = () => {
                 console.log(error);
             })
     }
+    const handleSave = () => {
+        if (!valid()) {
+            putSaveProduct();
+        }
+    }
     const handleCancel = () => {
         navigate(-1);
     }
+    const valid = () => {
+        let flag = false;
+        let errorMessage = initialMessageError;
+        let error1 = initialError;
+        if (product?.product_name === null || product?.product_name === undefined || product?.product_name === '') {
+            errorMessage.name = 'Name is not null';
+            error1.name = true;
+            flag = true;
+        } else {
+            errorMessage.name = '';
+            error1.name = false;
+        }
+
+        if (product?.brand === undefined || product?.brand === null) {
+            errorMessage.brand = 'Brand is not null';
+            error1.brand = true;
+            flag = true;
+        } else {
+            errorMessage.brand = '';
+            error1.brand = false;
+        }
+
+        if (color === undefined || color === '' || color === null || color.length === 0) {
+            errorMessage.color_size = 'Color and size is not null';
+            error1.color_size = true;
+            flag = true;
+        } else {
+            errorMessage.color_size = '';
+            error1.color_size = false;
+        }
+
+        if (product?.label === undefined || product.label === null) {
+            errorMessage.label = 'Label is not null';
+            error1.label = true;
+            flag = true;
+        } else {
+            errorMessage.label = '';
+            error1.label = false;
+        }
+
+        if (product?.material === undefined || product.material === null) {
+            errorMessage.material = 'Material is not null';
+            error1.material = true;
+            flag = true;
+        } else {
+            errorMessage.material = 'Material is not null';
+            error1.material = false;
+        }
+
+        if (product?.price === undefined || product?.price === 0 || product.price === null) {
+            errorMessage.price = 'Price is not null';
+            error1.price = true;
+            flag = true;
+        } else if (product.price < 0) {
+            errorMessage.price = 'Price is not less then zero';
+            error1.price = true;
+            flag = true;
+        } else {
+            errorMessage.price = '';
+            error1.price = false;
+        }
+
+        if (product?.img === undefined || product.img === null || product?.img === '') {
+            errorMessage.image = 'Image is not null';
+            error1.image = true;
+            flag = true;
+        } else {
+            errorMessage.image = '';
+            error1.image = false;
+        }
+        if (product?.gender === undefined || product.gender === null) {
+            errorMessage.gender = 'Gender is not null';
+            error1.gender = true;
+            flag = true;
+        } else {
+            errorMessage.gender = '';
+            error1.gender = false;
+        }
+        setMessageError(errorMessage);
+        setError(error1);
+        return flag;
+    }
+    const postCreateProduct = () => {
+        Axios.post("product/insert-product", {
+            brand: product?.brand,
+            color: color,
+            description: 'string',
+            gender: product?.gender,
+            img: product?.img,
+            is_active: true,
+            is_new: product?.is_new,
+            label: product?.label,
+            lstImage: lstImage,
+            material: product?.material,
+            price: product?.price,
+            product_name: product?.product_name,
+        })
+            .then((res) => {
+                alert(res.data);
+                navigate(-1);
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+    }
     const handleCreate = () => {
-        alert('create');
-        navigate(-1);
+        if (!valid()) {
+            postCreateProduct();
+        }
+
     }
 
+    useEffect(() => {
+        Axios.get(`brand/get-list-brand`)
+            .then(res => {
+                setBrands(res.data);
+            }).catch((error) => {
+                console.log(error);
+
+            })
+    }, [])
+    useEffect(() => {
+        Axios.get(`label/get-list-label`)
+            .then(res => {
+                setLabels(res.data);
+            }).catch((error) => {
+                console.log(error);
+
+            })
+    }, [])
+    useEffect(() => {
+        Axios.get(`material/get-list-material`)
+            .then(res => {
+                setMaterials(res.data);
+            }).catch((error) => {
+                console.log(error);
+
+            })
+    }, [])
+    useEffect(() => {
+        Axios.get(`discount/get-list-discount`)
+            .then(res => {
+                setDiscounts(res.data);
+            }).catch((error) => {
+                console.log(error);
+
+            })
+    }, [])
+    const filterBrands = () => {
+        if (product?.brand !== null) {
+            for (var i in brands) {
+                if (product?.brand?.id === brands[i].id) {
+                    return brands[i];
+                }
+            }
+        }
+        return null;
+    }
+    const filterLabel = () => {
+        if (product?.label !== null) {
+            for (var i in labels) {
+                if (product?.label?.id === labels[i].id) {
+                    return labels[i];
+                }
+            }
+        }
+        return null;
+    }
+    const filterMaterial = () => {
+        if (product?.material !== null) {
+            for (var i in materials) {
+                if (product?.material?.id === materials[i].id) {
+                    return materials[i];
+                }
+            }
+        }
+        return null;
+    }
+    const filterGender = () => {
+
+        if (product?.gender !== null) {
+            for (var i in gender) {
+                console.log(product?.gender?.id);
+                if (product?.gender?.id == gender[i].id) {
+                    return gender[i];
+                }
+            }
+        }
+        return null;
+    }
+    const filterDiscount = () => {
+
+        if (product?.discount !== null || product.discount !== undefined) {
+            for (var i in discounts) {
+                if (product?.discount?.id == discounts[i].id) {
+                    return discounts[i];
+                }
+            }
+        }
+        return null;
+    }
+    const handleChange = (e: any) => {
+        const name = e.target.name;
+        const value = e.target.value;
+        setProduct({ ...product, [name]: value });
+    }
     return (
         <div className="container">
             <div className="updateClothesContainer">
@@ -78,13 +512,22 @@ const AddClothes = () => {
                 <div className="main">
                     <div className="left">
                         <div className="container-input">
-                            <div className="bottom">
-                                <TextField sx={{ width: '100%' }} label={'Name *'} />
-                            </div>
+                            <TextField sx={{ width: '100%' }}
+                                onChange={handleChange}
+                                error={error.name}
+                                value={`${product?.product_name ? product?.product_name : ""}`}
+                                label={'Name *'}
+                                name="product_name" />
+                            {
+                                error.name && <FormControl error variant="standard">
+                                    <FormHelperText id="component-error-text">{messageError.name}</FormHelperText>
+                                </FormControl>
+                            }
+
                         </div>
                         <div className="container-input">
                             <div className="top">
-                                <label>Descriptions <span>*</span></label>
+                                <label>Descriptions</label>
                             </div>
                             <div className="bottom">
                                 <CKEditor key={1}
@@ -107,94 +550,192 @@ const AddClothes = () => {
                             </div>
                         </div>
                         <div className="container-input">
-                            <div className="bottom">
-                                <Autocomplete
-                                    id="select-brand"
-                                    sx={{ width: '100%' }}
-                                    options={option}
-                                    autoHighlight
-                                    getOptionLabel={(option) => option.brand}
-                                    value={testSelect}
-                                    onChange={(event: any, newInputValue: any) => {
-                                        setTestSelect(newInputValue);
-                                        console.log(newInputValue);
-                                    }}
-                                    renderOption={(props: any, option: any) => (
-                                        <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
-                                            <Avatar
-                                                src={`${option.img}`}
-                                                alt=""
-                                                style={{ marginRight: '5px' }}
-                                            />
-                                            {option.brand}
-                                        </Box>
-                                    )}
-                                    renderInput={(params) => (
-                                        <TextField
-                                            {...params}
-                                            sx={{ width: '100%' }}
-                                            label="Brand *"
-                                            value={searchBrand}
-                                            onChange={handleChangeSearchBrand}
-                                            inputProps={{
-                                                ...params.inputProps,
-                                            }}
+                            <Autocomplete
+                                id="select-brand"
+                                sx={{ width: '100%' }}
+                                options={brands}
+                                autoHighlight
+                                getOptionLabel={(option) => option.brand}
+                                value={filterBrands()}
+                                onChange={(event: any, newInputValue: any) => {
+                                    setProduct({ ...product, brand: newInputValue });
+                                    console.log(newInputValue);
+                                }}
+                                renderOption={(props: any, option) => (
+                                    <Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props}>
+                                        <Avatar
+                                            src={`http://localhost:8081/api/brand/image/load/${option.image}`}
+                                            alt=""
+                                            style={{ marginRight: '5px' }}
                                         />
-                                    )}
-                                />
-                            </div>
+                                        {option.brand}
+                                    </Box>
+                                )}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        error={error.brand}
+                                        sx={{ width: '100%' }}
+                                        label="Brand *"
+                                    />
+                                )}
+                            />
+                            {error.brand && <FormControl error variant="standard">
+                                <FormHelperText id="component-error-text">{messageError.brand}</FormHelperText>
+                            </FormControl>}
+
                         </div>
-                        <div className="container-input">
+                        {id_product && <div className="container-input">
                             <div className="bottom">
                                 <Autocomplete
                                     disablePortal
                                     id="discount"
-                                    options={option}
-                                    getOptionLabel={(option) => option.brand}
+                                    disabled
+                                    value={filterDiscount()}
+                                    options={discounts}
+                                    getOptionLabel={(option) => option.percent.toString()}
                                     sx={{ width: '100%' }}
                                     renderInput={(params) => <TextField {...params} label="Discount *" />}
                                 />
                             </div>
+                        </div>}
+
+                        <div className="container-input">
+                            <Autocomplete
+                                disablePortal
+                                id="material"
+                                options={materials}
+                                value={filterMaterial()}
+                                getOptionLabel={(option) => option.material_name}
+                                onChange={(event: any, newInputValue: any) => {
+                                    setProduct({ ...product, material: newInputValue });
+                                }}
+                                sx={{ width: '100%' }}
+                                renderInput={(params) => <TextField
+                                    {...params}
+                                    error={error.material}
+                                    label="Material *" />}
+                            />
+                            {error.material && <FormControl error variant="standard">
+                                <FormHelperText id="component-error-text">{messageError.material}</FormHelperText>
+                            </FormControl>}
                         </div>
                         <div className="container-input">
-                            <div className="bottom">
-                                <Autocomplete
-                                    disablePortal
-                                    id="material"
-                                    options={option}
-                                    getOptionLabel={(option) => option.brand}
-                                    sx={{ width: '100%' }}
-                                    renderInput={(params) => <TextField {...params} label="Material *" />}
-                                />
-                            </div>
+                            <Autocomplete
+                                disablePortal
+                                id="label"
+                                options={labels}
+                                value={filterLabel()}
+                                getOptionLabel={(option) => option.label}
+                                onChange={(event: any, newInputValue: any) => {
+                                    setProduct({ ...product, label: newInputValue });
+                                }}
+                                sx={{ width: '100%' }}
+                                renderInput={(params) => <TextField {...params} error={error.label} label="Label *" />}
+                            />
+                            {error.label && <FormControl error variant="standard">
+                                <FormHelperText id="component-error-text">{messageError.label}</FormHelperText>
+                            </FormControl>}
                         </div>
                         <div className="container-input">
-                            <div className="bottom">
-                                <Autocomplete
-                                    disablePortal
-                                    id="label"
-                                    options={option}
-                                    getOptionLabel={(option) => option.brand}
-                                    sx={{ width: '100%' }}
-                                    renderInput={(params) => <TextField {...params} label="Label *" />}
-                                />
+                            <div className="color-size">
+                                <label style={{ fontWeight: '600', color: 'gray' }}>Color and Size</label>
+                                <Button variant="outlined" sx={{ width: 50 }} onClick={() => {
+                                    setOpen(true);
+                                    setIsChooseColor(null);
+                                }}><Add /></Button>
+                                <Box mb={2}
+                                    paddingTop={2}
+                                    paddingLeft={2}
+                                    display="flex"
+                                    flexDirection="row"
+                                    // justifyContent="flex-end" # DO NOT USE THIS WITH 'scroll'
+                                    height="200px" // fixed the height
+                                    width="600px"
+                                    flexWrap='wrap'
+                                    gap={3}
+                                    style={{
+                                        border: `1px solid ${error.color_size ? 'red' : 'black'}`,
+                                        overflow: "hidden",
+                                        overflowY: "scroll" // added scroll
+                                    }}>
+                                    {color.map((item: any, index: number) => <td><ItemColor
+                                        key={index}
+                                        item={item}
+                                        setOpen={setOpen}
+                                        setIsChooseColor={setIsChooseColor} /></td>)}
+                                </Box>
+                                <ColorAndSize setOpen={setOpen} open={open}
+                                    isChooseColor={isChooseColor}
+                                    setIsChooseColor={setIsChooseColor}
+                                    setLstImage={setLstImage}
+                                    setColor={setColor}
+                                    color={color}
+                                    id_product={id_product}
+                                    setLoadingColor={setLoadingColor}
+                                    setAddColorAndSize={setAddColorAndSize}
+                                    addColorAndSize={addColorAndSize} />
                             </div>
+                            {
+                                error.color_size && <FormControl error variant="standard">
+                                    <FormHelperText id="component-error-text">{messageError.color_size}</FormHelperText>
+                                </FormControl>
+                            }
+
                         </div>
                         <div className="container-input">
-                            <div className="bottom">
-                                <TextField
-                                    label={'Price *'}
-                                    type={'number'}
+                            <Autocomplete
+                                disablePortal
+                                id="gender"
+                                options={gender}
+                                value={filterGender()}
+                                getOptionLabel={(option) => option.gender}
+                                onChange={(event: any, newInputValue: any) => {
+                                    setProduct({ ...product, gender: newInputValue });
+                                }}
+                                sx={{ width: '30%' }}
+                                renderInput={(params) => <TextField {...params} error={error.gender} label="Gender *" />}
+                            />
+                            {error.gender && <FormControl error variant="standard">
+                                <FormHelperText id="component-error-text">{messageError.gender}</FormHelperText>
+                            </FormControl>}
+
+                        </div>
+                        <div className="container-input">
+                            <FormGroup>
+                                <FormControlLabel
+                                    control={<Switch value={product?.is_new} checked={product?.is_new}
+                                        onChange={(e) => setProduct({ ...product, is_new: e.target.checked })} />}
+                                    label="New"
                                 />
-                            </div>
+                            </FormGroup>
+                        </div>
+                        <div className="container-input">
+                            <TextField
+                                name="price"
+                                value={`${product?.price}`}
+                                onChange={handleChange}
+                                label={'Price *'}
+                                type={'number'}
+                                error={error.price}
+                            />
+                            {error.price && <FormControl error variant="standard">
+                                <FormHelperText id="component-error-text">{messageError.price}</FormHelperText>
+                            </FormControl>}
+
                         </div>
                     </div>
                     <div className="right">
                         <div className="imageContainer">
                             <div className="image">
                                 {img ?
-                                    <img src={img} alt="" /> : <img src={require('../../../../image/frame.png')} alt=''></img>}
+                                    <img src={img} alt="" /> : id_product ?
+                                        <img style={{ borderColor: `${error.image ? 'red' : 'rgb(238, 234, 234)'}` }} src={`http://localhost:8081/api/product/image/load/${product?.img}`} alt='' />
+                                        : <img style={{ borderColor: `${error.image ? 'red' : 'rgb(238, 234, 234)'}` }} src={require('../../../../image/frame.png')} alt='' />}
                             </div>
+                            {error.image && <FormControl error variant="standard">
+                                <FormHelperText id="component-error-text">{messageError.image}</FormHelperText>
+                            </FormControl>}
                         </div>
                         <div className="btnContainer">
                             <Button variant="outlined" component="label">

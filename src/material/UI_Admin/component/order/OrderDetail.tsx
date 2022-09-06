@@ -5,10 +5,11 @@ import {
     SmartphoneOutlined,
     HelpOutlineOutlined,
 } from "@mui/icons-material";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import './OrderDetail.css';
 import Axios from "../../../Axios";
 import { useParams } from 'react-router-dom';
+import { style } from "@mui/system";
 
 
 const DeliveryDetailItem = (props: any) => {
@@ -86,6 +87,7 @@ const OrderDetail = () => {
     }
     const [billDetail, setBillDetail] = useState(bill);
     const location = useLocation();
+    const navigate = useNavigate();
     let state = location.state as any;
 
     useEffect(() => {
@@ -155,10 +157,11 @@ const OrderDetail = () => {
             </div>
             <div className="footer-order">
                 <div className="link-back">
-                    <Link to={"/order"}>Return your order</Link>
+                    <a onClick={() => navigate(-1)} style={{ cursor: 'pointer' }}>Return your order</a>
+                    <Link to={`/report/receipt/${id_bill}`}>Move to receipt</Link>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
 export default OrderDetail;

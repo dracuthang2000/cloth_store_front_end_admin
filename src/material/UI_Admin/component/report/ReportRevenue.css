@@ -3,6 +3,7 @@
     flex-direction: column;
     width: 100%;
     gap: 60px;
+    
 }
 .fieldRevenueContainer{
     display: flex;
@@ -15,7 +16,10 @@
     flex-direction: column;
     justify-content: center;
     width: 800px;
+    padding: 10px;
     height: auto;
+    background-color: white;
+
 }
 .container .reportRevenueContainer .reportRevenueTitle{
     display: flex;

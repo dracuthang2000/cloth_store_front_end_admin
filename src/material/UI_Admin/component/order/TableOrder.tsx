@@ -57,7 +57,8 @@ export default function TableOrder(props: any) {
     const [page, setPage] = React.useState(0);
     const [rowsPerPage, setRowsPerPage] = React.useState(10);
     const [product, setProduct] = React.useState<Partial<Data>[]>([]);
-
+    const [shipper, setShipper] = React.useState([] as any);
+    const [loading, setLoading] = React.useState(false);
     const handleChangePage = (event: unknown, newPage: number) => {
         setPage(newPage);
     };
@@ -74,10 +75,11 @@ export default function TableOrder(props: any) {
                     let billTemp = res.data;
                     setProduct(billTemp.map((data: any) => {
                         return {
-                            username: data.receiver.first_name,
+                            username: data.receiver.last_name + " " + data.receiver.first_name,
                             bill_number: data.id,
-                            shipper: '',
-                            date: data.date
+                            shipper: data.id_shipper,
+                            date: data.date,
+                            state: data.state
                         }
                     }))
                 }).catch(error => {
@@ -89,10 +91,11 @@ export default function TableOrder(props: any) {
                     let billTemp = res.data;
                     setProduct(billTemp.map((data: any) => {
                         return {
-                            username: data.receiver.first_name,
+                            username: data.receiver.last_name + " " + data.receiver.first_name,
                             bill_number: data.id,
-                            shipper: '',
-                            date: data.date
+                            shipper: data.id_shipper,
+                            date: data.date,
+                            state: data.state
                         }
                     }))
                 }).catch(error => {
@@ -103,7 +106,67 @@ export default function TableOrder(props: any) {
 
     React.useEffect(() => {
         getApiByState(props.state);
-    }, [props.state]);
+    }, [props.state, loading]);
+    React.useEffect(() => {
+        Axios.get(`/admin/get_list_staff_by_role_id?idRole=3`, {
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem("accessToken")
+            }
+        })
+            .then(res => {
+                setShipper(res.data);
+                console.log(res.data);
+
+            }).catch(error => {
+                console.log(error);
+            })
+    }, [])
+    const handleAccept = (item: any) => {
+        let selectShipper = '' as any;
+        for (var i in product) {
+            if (product[i].bill_number === item.bill_number) {
+                selectShipper = product[i].shipper;
+                break;
+            }
+        }
+        if (selectShipper !== '' && selectShipper !== null) {
+            Axios.put(`order/update-status-order`, {
+                "id": item.bill_number,
+                "id_shipper": selectShipper,
+                "state": "DEL"
+            }, {
+                headers: {
+                    'Authorization': 'Bearer ' + sessionStorage.getItem("accessToken")
+                }
+            })
+                .then(res => {
+                    setLoading(!loading);
+                    alert('Success');
+                }).catch(error => {
+                    console.log(error);
+                })
+        } else {
+            alert(`Please choose shipper on bill number: ${item.bill_number}`)
+        }
+
+    }
+    const handleCancel = (item: any) => {
+        Axios.put(`order/update-status-order`, {
+            "id": item.bill_number,
+            "id_shipper": 0,
+            "state": "CAN"
+        }, {
+            headers: {
+                'Authorization': 'Bearer ' + sessionStorage.getItem("accessToken")
+            }
+        })
+            .then(res => {
+                setLoading(!loading);
+                alert('Success');
+            }).catch(error => {
+                console.log(error);
+            })
+    }
     return (
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
             <TableContainer sx={{ maxHeight: 485 }}>
@@ -141,6 +204,7 @@ export default function TableOrder(props: any) {
                                                                     labelId="demo-simple-select-label"
                                                                     id="demo-simple-select"
                                                                     value={value}
+                                                                    disabled={row.shipper === null || props.state === "PRO" ? false : true}
                                                                     label="Shipper"
                                                                     onChange={(e) => {
                                                                         setProduct(product.map((data: any) => {
@@ -151,31 +215,17 @@ export default function TableOrder(props: any) {
                                                                         }));
                                                                     }}
                                                                 >
-                                                                    <MenuItem value={0}>none</MenuItem>
-                                                                    <MenuItem value={10}>10</MenuItem>
-                                                                    <MenuItem value={20}>20</MenuItem>
-                                                                    <MenuItem value={30}>30</MenuItem>
-                                                                    <MenuItem value={40}>40</MenuItem>
-                                                                    <MenuItem value={50}>50</MenuItem>
-                                                                    <MenuItem value={60}>60</MenuItem>
-                                                                    <MenuItem value={70}>70</MenuItem>
-                                                                    <MenuItem value={80}>80</MenuItem>
-                                                                    <MenuItem value={90}>90</MenuItem>
-                                                                    <MenuItem value={100}>100</MenuItem>
-                                                                    <MenuItem value={110}>110</MenuItem>
-                                                                    <MenuItem value={120}>120</MenuItem>
-                                                                    <MenuItem value={130}>130</MenuItem>
-                                                                    <MenuItem value={140}>140</MenuItem>
-                                                                    <MenuItem value={150}>150</MenuItem>
+                                                                    <MenuItem value={""}>none</MenuItem>
+                                                                    {shipper.map((data: any) => <MenuItem value={data.id}>{`${data.last_name} ${data.first_name}`}</MenuItem>)}
                                                                 </Select>
                                                             </FormControl>
-                                                            : column.id === 'action' ?
+                                                            : column.id === 'action' && props.state === "ALL" && row.state === "PRO" || column.id === 'action' && props.state === "PRO" ?
                                                                 <div style={{ display: 'flex', justifyContent: 'center', gap: '5px' }}>
                                                                     <Tooltip title={'accept'} arrow>
-                                                                        <Button variant="outlined"><Done /></Button>
+                                                                        <Button onClick={() => handleAccept(row)} variant="outlined"><Done /></Button>
                                                                     </Tooltip>
                                                                     <Tooltip title={'denied'} arrow>
-                                                                        <Button variant="outlined"><Close /></Button>
+                                                                        <Button variant="outlined" onClick={() => handleCancel(row)}><Close /></Button>
                                                                     </Tooltip>
                                                                 </div> : column.id === 'more' ?
                                                                     <div className='view-detail'>

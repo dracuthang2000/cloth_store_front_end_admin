@@ -18,11 +18,11 @@ const Dropdown = () => {
                     <Store className="icon" />
                     <span>Product</span>
                 </li>
-                <li onClick={() => redirect('/product')} >
+                <li onClick={() => redirect('/product/color')} >
                     <ColorLens className="icon" />
                     <span>Color</span>
                 </li>
-                <li>
+                <li onClick={() => redirect(`product/brand`)}>
                     <BrandingWatermark className="icon" />
                     <span>Brand</span>
                 </li>
@@ -30,11 +30,11 @@ const Dropdown = () => {
                     <Discount className="icon" />
                     <span>Discount</span>
                 </li>
-                <li>
+                <li onClick={() => redirect(`/product/label`)}>
                     <Bookmarks className="icon" />
                     <span>Label</span>
                 </li>
-                <li>
+                <li onClick={() => redirect(`product/material`)}>
                     <AllInclusive className="icon" />
                     <span>Material</span>
                 </li>
